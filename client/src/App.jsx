@@ -3,9 +3,22 @@ import sqlLogo from "./assets/sql-server.png";
 import { useState } from "react";
 function App() {
   const [queryDesc, setQueryDesc] = useState("");
-  const handleSubmit = (e) => {
+  const [generatedSql, setGeneratedSql] = useState("");
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("form submitted :", queryDesc);
+    const sqlQuery = await queryGenerator();
+    setGeneratedSql(sqlQuery);
+  };
+  const queryGenerator = async () => {
+    const response = await fetch("http://localhost:3005/generate", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ queryDescription: queryDesc }),
+    });
+    const data = await response.json();
+    return data.response.trim();
   };
   return (
     <main className={styles.main}>
@@ -19,7 +32,9 @@ function App() {
           placeholder="Describe your query"
           onChange={(e) => setQueryDesc(e.target.value)}
         />
+
         <input type="submit" value="Generate query" />
+        <pre>{generatedSql}</pre>
       </form>
     </main>
   );
